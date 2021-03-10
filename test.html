@@ -7,7 +7,7 @@
     <script src="./helpers/utils.js"></script>
     <script src="./helpers/fn.js"></script>
     <style>
-    canvas{
+    canvas {
       -moz-user-select: none;
       -webkit-user-select: none;
       -ms-user-select: none;
@@ -18,232 +18,85 @@
   <body>
     <div style="width:90%; margin: 0 auto">
       <canvas id="canvas"></canvas>
-      <div class="all-the-buttons" style="margin: auto; width: 50%">
+      <div class="all-the-buttons" style="margin: 0 auto">
         <button id="randomizeData">Randomize Data</button>
-        <button id="addDataset">Add Dataset</button>
-        <button id="removeDataset">Remove Dataset</button>
-        <button id="addData">Add Data</button>
-        <button id="removeData">Remove Data</button>
+        <!-- <button id="addDataset">Add Dataset</button> -->
+        <!-- <button id="removeDataset">Remove Dataset</button> -->
+        <!-- <button id="addData">Add Data</button> -->
+        <!-- <button id="removeData">Remove Data</button> -->
       </div>
     </div>
+
     <script>
-      const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-
-      let initData = [
-        randomScalingFactor(),
-        randomScalingFactor(),
-        randomScalingFactor(),
-        randomScalingFactor(),
-        randomScalingFactor(),
-        randomScalingFactor(),
-        randomScalingFactor(),
-        randomScalingFactor(),
-        randomScalingFactor(),
-        randomScalingFactor(),
-        randomScalingFactor(),
-        randomScalingFactor(),
-        randomScalingFactor(),
-        randomScalingFactor(),
-        randomScalingFactor(),
-        randomScalingFactor(),
-        randomScalingFactor(),
-        randomScalingFactor(),
-        randomScalingFactor(),
-        randomScalingFactor(),
-        randomScalingFactor(),
-        randomScalingFactor(),
-        randomScalingFactor(),
-        randomScalingFactor(),
-        randomScalingFactor(),
-        randomScalingFactor(),
-        randomScalingFactor()
-      ];
-      let drawMax = Math.max.apply(Math, initData);
-      let drawMin = Math.min.apply(Math, initData);
-
-      console.log(drawMax, drawMin);
-
-      const config = {
-        type: 'line',
-        data: {
-          labels: [
-            'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December',
-            'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'
-          ],
-          datasets: [{
-            label: '1',
-            backgroundColor: window.chartColors.red,
-            borderColor: window.chartColors.red,
-            data: initData,
-            fill: false,
-          }]
-        },
-        options: {
-          elements: {
-            line: { tension: 0 }
-          },
-          responsive: true,
-          title: {
-            display: true,
-            text: 'Genesis One Chart'
-          },
-          tooltips: {
-            mode: 'index',
-            intersect: false,
-          },
-          hover: {
-            mode: 'nearest',
-            intersect: true
-          },
-          scales: {
-            xAxes: [{
-              display: true,
-              scaleLabel: {
-                display: true,
-                labelString: 'Month'
-              }
-            }],
-            yAxes: [{
-              display: true,
-              scaleLabel: {
-                display: true,
-                labelString: 'Value'
-              }
-            }]
-         },
-          annotation: {
-            annotations: [
-              {
-                type: 'line',
-                label : { 
-                    content: 'max',
-                    enabled: true,
-                    position: 'left'
-                },
-                mode: 'horizontal',
-                scaleID: 'y-axis-0',
-                value: drawMax,
-                borderColor: 'blue',
-                borderWidth: 2
-              },
-              {
-                type: 'line',
-                label : { 
-                    content: 'min',
-                    enabled: true,
-                    position: 'left'
-                },
-                mode: 'horizontal',
-                scaleID: 'y-axis-0',
-                value: drawMin,
-                borderColor: 'pink',
-                borderWidth: 2
-            },
-           ],
-            drawTime: "afterDraw"
-          }
-        }
-      };
-
       window.onload = function() {
-        var ctx = document.getElementById('canvas').getContext('2d');
+        let ctx = document.getElementById('canvas').getContext('2d');
         window.myLine = new Chart(ctx, config);
       };
 
+      let colorNames = Object.keys(window.chartColors);
+      // Randomize Data
       document.getElementById('randomizeData').addEventListener('click', function() {
         config.data.datasets.forEach(function(dataset) {
-          dataset.data = dataset.data.map(function() {
-            return randomScalingFactor();
-          });
-
+          dataset.data = dataset.data.map(() => randomScalingFactor());
         });
 
         window.myLine.update();
       });
 
-      var colorNames = Object.keys(window.chartColors);
+    // Add Dataset
+    document.getElementById('addDataset').addEventListener('click', function() {
+      const colorName = colorNames[config.data.datasets.length % colorNames.length];
+      const newColor = window.chartColors[colorName];
 
-      document.getElementById('addDataset').addEventListener('click', function() {
-        var colorName = colorNames[config.data.datasets.length % colorNames.length];
-        var newColor = window.chartColors[colorName];
-
-        var newDataset = {
-          label: config.data.datasets.length + 1,
-          backgroundColor: newColor,
-          borderColor: newColor,
-          data: [],
-          fill: false,
-        }
-
-        for (var index = 0; index < config.data.labels.length; ++index) {
-          newDataset.data.push(randomScalingFactor());
-        }
-
-        console.log('newDataset', newDataset.data);
-        let newMax = Math.max.apply(Math, newDataset.data);
-        let newMin = Math.min.apply(Math, newDataset.data);
-        console.log(newMax, newMin);
-        console.log(config);
-
-        config.data.datasets.push(newDataset);
-        window.myLine.update();
-
-      });
-
-
-      document.getElementById('addData').addEventListener('click', function() {
-        if (config.data.datasets.length > 0) {
-          var month = MONTHS[config.data.labels.length % MONTHS.length];
-          config.data.labels.push(month);
-
-          config.data.datasets.forEach(function(dataset) {
-            dataset.data.push(randomScalingFactor());
-          });
-
-          window.myLine.update();
-        }
-      });
-
-      document.getElementById('removeData').addEventListener('click', function() {
-        config.data.labels.splice(-1, 1); // remove the label first
-
-        config.data.datasets.forEach(function(dataset) {
-          dataset.data.pop();
-        });
-
-        window.myLine.update();
-      });
-
-      document.getElementById('removeDataset').addEventListener('click', function() {
-        config.data.datasets.splice(0, 1);
-        window.myLine.update();
-      });
-
-      let getFibRetracement = ({ levels } = {}) => {
-        if (!levels || typeof levels !== 'object' || Array.isArray(levels) || Object.keys(levels).length === 0) {
-          throw new Error('Unable to compute fib trace with the referenced `levels`');
-        }
-
-        const zero = Number(levels[0]);
-        const one = Number(levels[1]);
-
-        if (isNaN(zero) || isNaN(one)) {
-          return {};
-        }
-
-        const distance = Math.abs(one - zero);
-        const operation = one > zero ? (first, second) => first - second : (first, second) => first + second;
-
-        return Object.fromEntries(
-          module.exports.levels.map(level => {
-            const difference = (1 - level) * distance;
-            const value = operation(levels[1], difference);
-
-            return [level, value];
-          })
-        );
+      let newDataset = {
+        label: config.data.datasets.length + 1,
+        backgroundColor: newColor,
+        borderColor: newColor,
+        data: [],
+        fill: false,
       }
 
+      for (let index = 0; index < config.data.labels.length; ++index) {
+        newDataset.data.push(randomScalingFactor());
+      }
+
+      let newMax = Math.max.apply(Math, newDataset.data);
+      let newMin = Math.min.apply(Math, newDataset.data);
+
+      config.data.datasets.push(newDataset);
+      window.myLine.update();
+
+    });
+
+
+    // Add Data Point
+    document.getElementById('addData').addEventListener('click', function() {
+      if (config.data.datasets.length > 0) {
+        let month = MONTHS[config.data.labels.length % MONTHS.length];
+        config.data.labels.push(month);
+
+        config.data.datasets.forEach(function(dataset) {
+          dataset.data.push(randomScalingFactor());
+        });
+
+        window.myLine.update();
+      }
+    });
+
+    document.getElementById('removeData').addEventListener('click', function() {
+      config.data.labels.splice(-1, 1); // remove the label first
+
+      config.data.datasets.forEach(function(dataset) {
+        dataset.data.pop();
+      });
+
+      window.myLine.update();
+    });
+
+    document.getElementById('removeDataset').addEventListener('click', function() {
+      config.data.datasets.splice(0, 1);
+      window.myLine.update();
+    });
     </script>
 
   </body>
